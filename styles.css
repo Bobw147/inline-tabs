@@ -1,13 +1,13 @@
 /**
  * Tabs
  */
-.in-page-tabs {
+.inline-tabs {
 	display: flex;
     color: black;
 	flex-wrap: wrap; /* make sure it wraps */
 }
 
-.in-page-tabs label {
+.inline-tabs label {
 	order: 1; /* Put the labels first */
 	display: block;
 	padding: 1rem 2rem;
@@ -18,7 +18,7 @@
     transition: background ease 0.2s;
 }
 
-.in-page-tabs .in-page-tab {
+.inline-tabs .in-page-tab {
     order: 99; /* Put the tabs last */
     flex-grow: 1;
     width: 100%;
@@ -28,25 +28,25 @@
 
 }
 
-.in-page-tabs input[type="radio"] {
+.inline-tabs input[type="radio"] {
 	display: none;
 }
 
-.in-page-tabs input[type="radio"]:checked + label {
+.inline-tabs input[type="radio"]:checked + label {
 	background: #42A5F5;
 }
 
-.in-page-tabs input[type="radio"]:checked + label + .in-page-tab {
+.inline-tabs input[type="radio"]:checked + label + .in-page-tab {
 	display: block;
 }
 
 @media (max-width: 45em) {
-    .in-page-tabs .in-page-tab,
-    .in-page-tabs label {
+    .inline-tabs .in-page-tab,
+    .inline-tabs label {
         order: initial;
     }
 
-    .in-page-tabs label {
+    .inline-tabs label {
         width: 100%;
         margin-right: 0;
         margin-top: 0.2rem;

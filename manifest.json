@@ -1,6 +1,6 @@
 {
-	"id": "in-page-tabs-plugin",
-	"name": "In-Page Tabs",
+	"id": "inline-tabs-plugin",
+	"name": "Inline Tabs",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
 	"description": "Demonstrates some of the capabilities of the Obsidian API.",

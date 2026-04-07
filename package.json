@@ -1,5 +1,5 @@
 {
-	"name": "in-page-tabs-plugin",
+	"name": "inline-tabs-plugin",
 	"version": "1.0.0",
 	"description": "Implements the ability to add tabs intoObsidian pages.",
 	"main": "main.js",

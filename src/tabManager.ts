@@ -16,7 +16,7 @@ export class TabManager {
 
     constructor(app: App, containerEl: HTMLElement) {
         this.app = app;
-        this.tabsDiv = containerEl.createEl('div', {cls: 'in-page-tabs'});
+        this.tabsDiv = containerEl.createEl('div', {cls: 'inline-tabs'});
         this.tabsDiv.addEventListener('click', mouseEvent => this.handleTabClick(mouseEvent));
         this.currentViewMode = this.getViewMode();
         this.wasSourceMode = false;
