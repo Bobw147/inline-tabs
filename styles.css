@@ -1,0 +1,71 @@
+/**
+ * Tabs
+ */
+.in-page-tabs {
+	display: flex;
+    color: black;
+	flex-wrap: wrap; /* make sure it wraps */
+}
+
+.in-page-tabs label {
+	order: 1; /* Put the labels first */
+	display: block;
+	padding: 1rem 2rem;
+	margin-right: 0.2rem;
+	cursor: pointer;
+    background: #90CAF9;
+    font-weight: bold;
+    transition: background ease 0.2s;
+}
+
+.in-page-tabs .in-page-tab {
+    order: 99; /* Put the tabs last */
+    flex-grow: 1;
+    width: 100%;
+	display: none;
+    padding: 1rem;
+    background: #42A5F5;
+
+}
+
+.in-page-tabs input[type="radio"] {
+	display: none;
+}
+
+.in-page-tabs input[type="radio"]:checked + label {
+	background: #42A5F5;
+}
+
+.in-page-tabs input[type="radio"]:checked + label + .in-page-tab {
+	display: block;
+}
+
+@media (max-width: 45em) {
+    .in-page-tabs .in-page-tab,
+    .in-page-tabs label {
+        order: initial;
+    }
+
+    .in-page-tabs label {
+        width: 100%;
+        margin-right: 0;
+        margin-top: 0.2rem;
+    }
+}
+
+/**
+ * Generic Styling
+*/
+body {
+    background: black;
+    color: white;
+    min-height: 100vh;
+	box-sizing: border-box;
+	padding-top: 10vh;
+    font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; 
+    font-weight: 300;
+    line-height: 1.5;
+    max-width: 60rem;
+    margin: 0 auto;
+    font-size: 112%;
+}
