@@ -5,7 +5,7 @@ export class CodeBlockProcessor {
     private _tabManager: TabManager|null = null; 
 
     get tabManager(): TabManager | null {
-        return this.tabManager;
+        return this._tabManager;
     }
 
     process(app: App, source: string, containerElement: HTMLElement, ctx: object, runCount: number) {
