@@ -17,6 +17,7 @@ export default class InPageTabs extends Plugin {
 	async onload() {
 		await this.loadSettings();
 
+/*
         this.registerMarkdownCodeBlockProcessor('page-tabs', (source, el, ctx) => {
             this.codeBlockProcessor = new CodeBlockProcessor();
             this.runCount++;    // Increment runCount to ensure unique radio group names for each code block instance.
@@ -29,10 +30,66 @@ export default class InPageTabs extends Plugin {
                 this.intervalTimerRunning = true;
             }
         });
+*/
+        // This registers a markdown post processor which looks for code blocks with the language 'page-tabs' and processes them using the CodeBlockProcessor.
+        this.registerMarkdownPostProcessor((container, ctx) => { 
+            const tabStarts = this.findElementsWithText(container, '<>tabs-start');
+            if (tabStarts.length === 0) return;
+            for (const tabStart of tabStarts) {
+                const contentEnd = tabStart.textContent?.indexOf('<>tabs-end');
+                if (contentEnd === undefined || contentEnd === -1) break;
+            
+                const source = tabStart.textContent?.substring('<>tabs-start'.length, contentEnd);
+                if (!source) continue;
 
-		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new InPageTabsSettingTab(this.app, this));
+                const header: string[] = source.split('\n');
+                let tabGroupName: string = '';
+                let labelText: string = '';
+                let checked: boolean = false;
+                let content: string = '';
+                try {
+                    for (const line of header) {
+                        const [key, value] = line.split(':').map(part => part.trim());
+                        if (!key || !value) continue;
+
+                        if (key.toLowerCase() == 'tabgroupname') tabGroupName = value;
+                        else if (key.toLowerCase() == 'labeltext') labelText = value;
+                        else if (key.toLowerCase() == 'checked') checked = (value.toLowerCase() == 'true');
+                        else if (key.toLowerCase() == 'content') content = value;
+                    }
+                    if (!tabGroupName || !labelText) continue;
+
+                    const tabsDiv = container.createEl('div', {cls: 'in-page-tabs'});
+                    const tabInput = tabsDiv?.createEl('input', {type: 'radio'});
+                    if (!tabInput ) continue;
+                    tabInput.name = tabGroupName;
+                    tabInput.id = `${tabGroupName}-${labelText}`;
+                    tabInput.checked = checked;
+
+                    tabsDiv.createEl('label', {text: labelText, attr: {for: tabInput.id}});
+
+                    const tabInner = tabsDiv.createEl('div', {cls: 'in-page-tab'})
+                    tabInner.createEl('span', {text: content});
+
+                    // Find the embedded item in the DOMM and relocate inside the tab content space
+                    const embeddedItem = container.('.internal-embed');
+                    console.log(tabStarts); // Outputs matching elements
+                } catch (error) {
+                    // Any error in the header that makes it invalid remains as plain text to show the error to the user
+                    // and processing continues for any other valid tab blocks in the same file.
+                    continue;
+                }
+            }
+        });
+        
+        // This adds a settings tab so the user can configure various aspects of the plugin
+        this.addSettingTab(new InPageTabsSettingTab(this.app, this));
 	}
+
+    findElementsWithText(container: HTMLElement, searchText: string) {
+        return Array.from(container.querySelectorAll('*'))
+        .filter(element => element.textContent.includes(searchText));
+    }
 
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData() as Partial<InPageTabsSettings>);
@@ -54,4 +111,46 @@ export default class InPageTabs extends Plugin {
             await this.codeBlockProcessor.tabManager.monitorTabActivity(markdownView);
         }
     }
+
+    tabProcessor(container: HTMLElement) {
+        const tabStarts = this.findElementsWithText(container, '<>tab-start');
+        if (tabStarts.length === 0) return;
+        for (const tabStart of tabStarts) {
+            const contentEnd = tabStart.textContent?.indexOf('<>tab-end');
+            if (contentEnd === undefined || contentEnd === -1) break;
+            
+            const source = tabStart.textContent?.substring('<>tab-start'.length, contentEnd);
+            if (!source) continue;
+
+            const header: string[] = source.split('\n');
+            let tabGroupName: string = '';
+            let labelText: string = '';
+            let checked: boolean = false;
+            try {
+                for (const line of header) {
+                    const [key, value] = line.split(':').map(part => part.trim());
+                    if (!key || !value) continue;
+
+                    if (key.toLowerCase() == 'tabgroupname') tabGroupName = value;
+                    else if (key.toLowerCase() == 'labeltext') labelText = value;
+                    else if (key.toLowerCase() == 'checked') checked = (value.toLowerCase() == 'true');    
+                }
+                if (!tabGroupName || !labelText) continue;
+
+                const tabDiv = tabStart.parentElement?.createEl('div', {cls: 'in-page-tabs'});
+                const tabInput = tabDiv?.createEl('input', {type: 'radio'});
+                if (!tabInput ) continue;
+                tabInput.name = tabGroupName;
+                tabInput.id = `${tabGroupName}-${labelText}`;
+                tabInput.createEl('label', {text: labelText, attr: {for: tabInput.id}});
+                tabInput.checked = checked;
+
+                console.log(tabStarts); // Outputs matching elements
+            } catch (error) {
+                // Any error in the header that makes it invalid remains as plain text to show the error to the user
+                // and processing continues for any other valid tab blocks in the same file.
+                continue;
+            }
+        }
+    };
 }

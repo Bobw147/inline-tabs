@@ -1,10 +1,14 @@
 import { App } from 'obsidian';
-import { TabManager } from 'tabManager';
+
+import { TabManager } from './tabManager';
 
 export class CodeBlockProcessor {
-    private _tabManager: TabManager|null = null; 
+    private _tabManager: TabManager | null = null; 
 
-    get tabManager(): TabManager | null {
+    get tabManager(): TabManager {
+        if (!this._tabManager) {
+            throw new Error('TabManager is not initialized');
+        }
         return this._tabManager;
     }
 

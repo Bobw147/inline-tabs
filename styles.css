@@ -3,7 +3,7 @@
  */
 .inline-tabs {
 	display: flex;
-    color: black;
+    color: white;
 	flex-wrap: wrap; /* make sure it wraps */
 }
 

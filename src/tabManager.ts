@@ -67,6 +67,7 @@ export class TabManager {
 
         if (viewState.mode == 'preview')
             return viewState.source ? ViewMode.Reading_Source_True : ViewMode.Reading_Source_False;
+        return ViewMode.Invalid_View_State;
     }
 
     async monitorTabActivity(markdownView: MarkdownView) {
