@@ -25,6 +25,7 @@
 	},
 	"dependencies": {
 		"eslint": "^9.39.4",
-		"obsidian": "latest"
+		"obsidian": "latest",
+		"uuid": "^13.0.0"
 	}
 }

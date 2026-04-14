@@ -37,7 +37,7 @@ export class TabManager {
         }
     }
 
-    createTab(tabGroupName: string, tabId: string, labelText: string, title: string, isChecked: boolean = false): HTMLInputElement | null {
+    createTab(tabGroupName: string, tabId: string, labelText: string, isChecked: boolean = false, content: HTMLElement[]): HTMLInputElement | null {
         if (this.tabsDiv) {
             const tab = this.tabsDiv.createEl('input', {type: 'radio'});
             if (!tab) return null;
@@ -46,9 +46,10 @@ export class TabManager {
             tab.name = tabGroupName;
 
             this.tabsDiv.createEl('label', {text: labelText, attr: {for: tabId}});
-            const tabInner = this.tabsDiv.createEl('div', {cls: 'in-page-tab'})
-            tabInner.createEl('h2', {text: title});
-            tabInner.createEl('p', {text: `Content for ${labelText}`});
+            const tabInner = this.tabsDiv.createEl('div', {cls: 'inline-tab'})
+            content.forEach(el => {
+                tabInner.appendChild(el);
+            });
             return tab;
         }
         return null;

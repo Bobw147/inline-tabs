@@ -18,7 +18,7 @@
     transition: background ease 0.2s;
 }
 
-.inline-tabs .in-page-tab {
+.inline-tabs .inline-tab {
     order: 99; /* Put the tabs last */
     flex-grow: 1;
     width: 100%;
@@ -36,12 +36,12 @@
 	background: #42A5F5;
 }
 
-.inline-tabs input[type="radio"]:checked + label + .in-page-tab {
+.inline-tabs input[type="radio"]:checked + label + .inline-tab {
 	display: block;
 }
 
 @media (max-width: 45em) {
-    .inline-tabs .in-page-tab,
+    .inline-tabs .inline-tab,
     .inline-tabs label {
         order: initial;
     }
