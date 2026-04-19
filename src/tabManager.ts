@@ -1,4 +1,5 @@
 import { App, MarkdownView, ViewStateResult } from 'obsidian';
+import { Tab, TabGroup } from 'tabs';
 
 enum ViewMode {
     Edit = 0,
@@ -10,18 +11,14 @@ enum ViewMode {
 
 // Remember to rename these classes and interfaces!
 export class TabManager {
-    private activeTab: HTMLInputElement | null = null;
-    private tabsDiv: HTMLDivElement | null = null;
-    private currentViewMode: ViewMode | null = null;
-    private app: App;
-    private wasSourceMode: boolean;
+    private tabGroups: Map<string, TabGroup> = new Map();
 
-    constructor(app: App, containerEl: HTMLElement) {
-        this.app = app;
-        this.tabsDiv = containerEl.createEl('div', {cls: 'inline-tabs'});
-        this.tabsDiv.addEventListener('click', mouseEvent => this.handleTabClick(mouseEvent));
-        this.currentViewMode = this.getViewMode();
-        this.wasSourceMode = false;
+    resetTabGroups(): void {
+        this.tabGroups = new Map();
+    }
+
+    getTabGroup(tabGroupName: string): TabGroup | undefined {
+        return this.tabGroups.get(tabGroupName);
     }
 
     private handleTabClick(mouseEvent: MouseEvent) {
@@ -35,6 +32,19 @@ export class TabManager {
             });
             this.activeTab = target as HTMLInputElement;
         }
+    }
+
+    createTab2(tabGroupName: string, tabId: string, labelText: string, isChecked: boolean = false, content: string[]): void {
+        let tabGroup: TabGroup;
+    
+        if (! this.tabGroups.has(tabGroupName))
+            tabGroup = new TabGroup();
+        else
+            tabGroup = this.tabGroups.get(tabGroupName) as TabGroup;
+
+        const tab: Tab = new Tab(labelText, isChecked, content);
+        tabGroup.addTab(tab);
+        this.tabGroups.set(tabGroupName, tabGroup);
     }
 
     createTab(tabGroupName: string, tabId: string, labelText: string, isChecked: boolean = false, content: HTMLElement[]): HTMLInputElement | null {

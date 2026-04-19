@@ -1,4 +1,8 @@
 import { App, MarkdownPostProcessorContext } from 'obsidian';
+import {
+    isCheckedProperty, isContentEndMarker, isContentStartMarker, isLabelProperty, isTabEndMarker,
+    isTabsEndMarker, isTabsStartMarker, isTabStartMarker, nextSibling
+} from 'tabProcessor';
 import { v4 as uuidv4 } from 'uuid';
 
 import { TabManager } from './tabManager';
@@ -14,79 +18,6 @@ export class TabsPostProcessor {
         this._tabManager = new TabManager(app, container);
     }
 
-    isMarker(node: ChildNode, propertyType: string, stripleadingNewlines: boolean = false): boolean {
-        if (node.nodeName === '#text'&& node.textContent != null) {
-            let textContent = node.textContent;
-            if (stripleadingNewlines) {
-                textContent = textContent.replace(/^[\r\n]+/, '');
-            }
-            return textContent.trim().toLowerCase() === propertyType.toLowerCase();
-        }
-        return false;
-    }
-
-    isContentStart(node: ChildNode): boolean {
-        return this.isMarker(node, 'content-start');
-    }
-
-    isContentEnd(node: ChildNode): boolean {
-        return this.isMarker(node, 'content-end');
-    }
-
-    isTabsStart(node: ChildNode, removeBR: boolean = false): boolean {
-        return this.isMarker(node, '<>tabs-start', removeBR);
-    }
-
-    isTabsEnd(node: ChildNode): boolean {
-        return this.isMarker(node, '<>tabs-end');
-    }
-
-    isTabStart(node: ChildNode): boolean {
-        return this.isMarker(node, '<>tab-start');
-    }
-
-    isTabEnd(node: ChildNode): boolean {
-        return this.isMarker(node, '<>tab-end');
-    }
-
-    isProperty(node: ChildNode, propertyType: string): [boolean, string] {
-        const fieldId = 0;
-        const fieldValue = 1;
-        const expectedFieldCount = 2;
-
-        if (node.nodeName === '#text' && node.textContent != null) {
-            const splitLine: string[] = node.textContent.split(':');
-            if (splitLine && splitLine.length === expectedFieldCount &&
-                splitLine[fieldId] !== undefined && 
-                splitLine[fieldValue] !== undefined &&
-                splitLine[fieldId].trim().toLowerCase() === propertyType.toLowerCase())
-            return [true, splitLine[fieldValue].trim()];
-        }
-        return [false, ''];
-    }
-
-    isChecked(node: ChildNode): [boolean, string] {
-        return this.isProperty(node, 'checked');
-    }
-
-    isLabel(node: ChildNode): [boolean, string] {
-        return this.isProperty(node, 'label');
-    }
-
-    nextSibling(currentNode: ChildNode | null, removeBR: boolean): ChildNode | null {
-        let node: ChildNode | null = (currentNode ? currentNode.nextSibling : null);
-        while (node) {
-            if (node.nodeName === 'BR' && removeBR) {
-                const next: ChildNode | null = node.nextSibling;
-                node.remove();
-                node = next;
-            }
-            else
-                break;
-        }
-        return node;
-    }
-
     process2(DOMContainer: HTMLElement, tabContainers: Element[]) {
         // DOMContainer is a 'div el-p' that contains all the declarations of all the top level tab groupings
         // tabContainers is an array of HTMLElelemnts that each contain the declarations for a single tab group.
@@ -97,8 +28,8 @@ export class TabsPostProcessor {
         for (const tabContainer of tabContainers) {
             if ((!tabContainer) || tabContainer.childNodes.length === 0) continue;
             let childNode: ChildNode | null = tabContainer.childNodes[0] as ChildNode;
-            while (childNode && !this.isTabsStart(childNode, true)) {
-                childNode = this.nextSibling(childNode, true) as ChildNode;
+            while (childNode && !isTabsStartMarker(childNode, true)) {
+                childNode = nextSibling(childNode, true) as ChildNode;
             }
             this.processTabGroup(DOMContainer, childNode);
         }
@@ -117,7 +48,7 @@ export class TabsPostProcessor {
         while (childNode) {
             switch (inTabsDef) {
                 case false:
-                    if (this.isTabsStart(childNode)) {
+                    if (isTabsStartMarker(childNode)) {
                         inTabsDef = true;
                         inTabDef = false;
                         tabGroupName = `${uuidv4()}`;
@@ -125,30 +56,30 @@ export class TabsPostProcessor {
                     break;
                 case true:
                     // <>tabs-end as highest priority to end tabs definition
-                    if (this.isTabsEnd(childNode)){
+                    if (isTabsEndMarker(childNode)){
                         inTabsDef = false;
                         tabGroupName = ``;
                         break;
                     } else {
                         switch (inTabDef) {
                             case false:
-                                if (this.isTabStart(childNode)) {
+                                if (isTabStartMarker(childNode)) {
                                     inTabDef = true;
                                     tabId = `${uuidv4()}`;
                                 }
                                 break;
                             case true: {
-                                const [isLabel, value] = this.isLabel(childNode);
+                                const [isLabel, value] = isLabelProperty(childNode);
                                 if (isLabel) {
                                     labelText = value;
                                     break;
                                 }
-                                const [isChecked, checkedValue] = this.isChecked(childNode);
+                                const [isChecked, checkedValue] = isCheckedProperty(childNode);
                                 if (isChecked) {
                                     checked = checkedValue.toLowerCase() === 'true';
                                     break;
                                 }
-                                if (this.isContentStart(childNode)) {
+                                if (isContentStartMarker(childNode)) {
                                     // Create a document fragment to hold the content as we may need
                                     // to move multiple nodes into the content of the tab.
                                     const [isolatedContent, nextChildNode] = this.processContent(childNode);
@@ -156,7 +87,7 @@ export class TabsPostProcessor {
                                     childNode = nextChildNode as ChildNode;
                                     break;
                                 }
-                                if (this.isTabEnd(childNode)) {
+                                if (isTabEndMarker(childNode)) {
                                     inTabDef = false;
 
                                     // See if we have the minimum neccessary to create a tab
@@ -183,7 +114,7 @@ export class TabsPostProcessor {
                     break;
                 }
                 if (childNode) {
-                    let nextNode: ChildNode = this.nextSibling(childNode, true) as ChildNode;
+                    let nextNode: ChildNode = nextSibling(childNode, true) as ChildNode;
                     childNode.remove();
                     childNode = nextNode;
                 }
@@ -193,12 +124,12 @@ export class TabsPostProcessor {
     processContent(contentStartNode: ChildNode): [HTMLElement[], ChildNode | null] {
         const content: HTMLElement[] = [];
 
-        let node: ChildNode | null = this.nextSibling(contentStartNode, true);
+        let node: ChildNode | null = nextSibling(contentStartNode, true);
         contentStartNode.remove();
-        while (node && !this.isContentEnd(node)) {
+        while (node && !isContentEndMarker(node)) {
             const clone = node.cloneNode(true) as HTMLElement;
             content.push(clone);
-            let nextNode: ChildNode | null = this.nextSibling(node, true);
+            let nextNode: ChildNode | null = nextSibling(node, true);
             node.remove();
             node = nextNode;
         }

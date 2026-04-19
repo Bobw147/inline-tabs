@@ -18,6 +18,14 @@ export default class InPageTabs extends Plugin {
 	async onload() {
 		await this.loadSettings();
 
+        this.registerMarkdownCodeBlockProcessor('inline-tabs', (source, el, ctx) => {
+            if (!this.codeBlockProcessor) {
+                this.codeBlockProcessor = new CodeBlockProcessor();
+            }
+            this.codeBlockProcessor.processTabGroup(source, el);
+            this.codeBlockProcessor.reset();
+        });
+/*
         // Register a markdown post processor
         this.registerMarkdownPostProcessor((container, ctx) => {
             // See if this leaf contains any tab declarations
@@ -25,10 +33,10 @@ export default class InPageTabs extends Plugin {
             if (tabContainers.length === 0) return;
 
             // If so, process the tab declarations and insert them into the DOM.
-            const tabsPostProcessor = new TabsPostProcessor(this.app, container, ctx);
-            tabsPostProcessor.process2(container, tabContainers);
+//            const tabsPostProcessor = new TabsPostProcessor(this.app, container, ctx);
+//            tabsPostProcessor.process2(container, tabContainers);
         });
-
+*/
         // This adds a settings tab so the user can configure various aspects of the plugin
         this.addSettingTab(new InPageTabsSettingTab(this.app, this));
 	}

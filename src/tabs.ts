@@ -3,10 +3,10 @@ import { v4 as uuidv4 } from 'uuid';
 export class Tab {
     private _title: string;
     private _checked: boolean;
-    private _content: ChildNode[];
+    private _content: string[];
     private _tabId: string = uuidv4();
     
-    constructor(title: string, checked: boolean, content: ChildNode []) {
+    constructor(title: string, checked: boolean, content: string []) {
         this._title = title;
         this._checked = checked;
         this._content = content;
@@ -24,12 +24,15 @@ export class Tab {
         return this._tabId;
     }
 
-    get content(): ChildNode[] {
+    get content(): string[] {
         return this._content;
     }
 }
 
 export class TabGroup {
+    forEach(arg0: (tab: Tab) => void) {
+        throw new Error('Method not implemented.');
+    }
     private _tabs: Tab[] = [];
     private _groupId: string = uuidv4();
 
