@@ -12,13 +12,19 @@ enum ViewMode {
 // Remember to rename these classes and interfaces!
 export class TabManager {
     private tabGroups: Map<string, TabGroup> = new Map();
-
+    private activeTab: HTMLInputElement | null = null;
     resetTabGroups(): void {
         this.tabGroups = new Map();
     }
 
     getTabGroup(tabGroupName: string): TabGroup | undefined {
         return this.tabGroups.get(tabGroupName);
+    }
+
+    resetTabGroup(tabGroupName: string): void {
+        if (this.tabGroups.has(tabGroupName)) {
+            this.tabGroups.delete(tabGroupName);
+        }
     }
 
     private handleTabClick(mouseEvent: MouseEvent) {
@@ -46,7 +52,7 @@ export class TabManager {
         tabGroup.addTab(tab);
         this.tabGroups.set(tabGroupName, tabGroup);
     }
-
+/*
     createTab(tabGroupName: string, tabId: string, labelText: string, isChecked: boolean = false, content: HTMLElement[]): HTMLInputElement | null {
         if (this.tabsDiv) {
             const tab = this.tabsDiv.createEl('input', {type: 'radio'});
@@ -98,4 +104,5 @@ export class TabManager {
             }
         }
     }
+*/
 }

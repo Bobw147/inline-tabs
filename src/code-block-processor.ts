@@ -37,6 +37,7 @@ export class CodeBlockProcessor {
                 const [isTabGroupName, value] = isTabGroupNameProperty(line);
                 if (isTabGroupName) {
                     tabGroupName = value;
+                    this.tabManager?.resetTabGroup(tabGroupName);
                     return;
                 }
                 if (isTabStartMarker(line)) {
@@ -72,7 +73,6 @@ export class CodeBlockProcessor {
                         const defaultContent: string =`Content for ${labelText}`;
                         content.push(defaultContent);
                     }
-                        
                     this._tabManager?.createTab2(tabGroupName, tabId, labelText, checked, content);
                                         
                     // Reset to default values for next tab definition
@@ -84,16 +84,17 @@ export class CodeBlockProcessor {
                 }
             }
         });
-        this.buildDomForTabGroup(tabGroupName, container);
+ //       this.buildDomForTabGroup(tabGroupName, container);
     }
 
-    buildDomForTabGroup(tabGroupName: string, container: ChildNode | null): void {
+    buildDomForTabGroup(tabGroupName: string, container: ChildNode | null, mode: "replace" | "append" = "append"): void {
         if (!container || !this._tabManager) return;
 
         const tabGroup = this._tabManager.getTabGroup(tabGroupName);
         if (!tabGroup) return;
 
-        const tabsDiv = container.createEl('div', {cls: 'inline-tabs'});
+        const tabsDiv = document.createElement('div');
+        tabsDiv.classList.add('inline-tabs');
 
         for (const tab of tabGroup.tabs) {
             if (!tab) return;
@@ -105,12 +106,16 @@ export class CodeBlockProcessor {
             tabsDiv.createEl('label', {text: tab.title, attr: {for: tab.tabId}});
             const tabInner = tabsDiv.createEl('div', {cls: 'inline-tab'});
             tab.content.forEach(line => {
-                const p = tabInner.createEl('p', {text: line});
-                tabInner.appendChild(p);
+                tabInner.createEl('p', {text: line});
+//                tabInner.appendChild(p);
             });
         };
-        container.appendChild(tabsDiv);
-        this._tabManager?.resetTabGroups();
+        if (mode === "replace") {
+            container.replaceWith(tabsDiv);
+        } else {
+            container.appendChild(tabsDiv);
+        }
+//        this._tabManager?.resetTabGroups();
     }   
 }
     

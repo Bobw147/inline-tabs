@@ -1,4 +1,5 @@
 import { MarkdownView, Plugin } from 'obsidian';
+import { TabGroup } from 'tabs';
 import { TabsPostProcessor } from 'tabsPostProcessor';
 
 import { CodeBlockProcessor } from './code-block-processor';
@@ -23,20 +24,16 @@ export default class InPageTabs extends Plugin {
                 this.codeBlockProcessor = new CodeBlockProcessor();
             }
             this.codeBlockProcessor.processTabGroup(source, el);
-            this.codeBlockProcessor.reset();
         });
-/*
+
         // Register a markdown post processor
         this.registerMarkdownPostProcessor((container, ctx) => {
-            // See if this leaf contains any tab declarations
-            const tabContainers: HTMLElement[] = this.findTabStarts(container);
-            if (tabContainers.length === 0) return;
-
-            // If so, process the tab declarations and insert them into the DOM.
-//            const tabsPostProcessor = new TabsPostProcessor(this.app, container, ctx);
-//            tabsPostProcessor.process2(container, tabContainers);
+            const tabStarts = this.findTabStarts(container);
+            tabStarts.forEach(tabStart => {
+                this.codeBlockProcessor?.buildDomForTabGroup('FirstTabGroup', container, "append");
+            });
         });
-*/
+ 
         // This adds a settings tab so the user can configure various aspects of the plugin
         this.addSettingTab(new InPageTabsSettingTab(this.app, this));
 	}
@@ -56,17 +53,17 @@ export default class InPageTabs extends Plugin {
         // view mode changes. The radio buttons are not selectable in Reading Mode if source=false
         // as this indicates Live Preview mode so the alternate buttons are active but do not
         // correspond with the diplayed set.
-        const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-        if (markdownView && this.codeBlockProcessor && this.codeBlockProcessor.tabManager) {
-            await this.codeBlockProcessor.tabManager.monitorTabActivity(markdownView);
-        }
+//        const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
+ //       if (markdownView && this.codeBlockProcessor && this.codeBlockProcessor.tabManager) {
+//            await this.codeBlockProcessor.tabManager.monitorTabActivity(markdownView);
+//        }
     }
 
     findTabStarts(container: HTMLElement): HTMLElement[] {
         const tabStarts: HTMLElement[] = [];
-        const elements = container.querySelectorAll('p');
+        const elements: NodeListOf<HTMLDivElement> = container.querySelectorAll('*');
         elements.forEach(element => {
-            if (element.textContent.includes('<>tabs-start')) {
+            if (element.textContent.trim().startsWith('<>FirstTabGroup')) {
                 tabStarts.push(element as HTMLElement);
             }
         });
